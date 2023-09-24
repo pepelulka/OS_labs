@@ -14,9 +14,7 @@ void CreateChildForPipe(char* fileName, int pipe[2], char** args) {
         exit(EXIT_FAILURE);
     }
     if (pid == 0) {
-        // close: decrement reference count of file descriptor in kernel
         close(pipe[PIPE_WRITE]);
-        // dup2: pipe[PIPE_READ] has an alias '0' ans '0' file descriptor is closed
         dup2(pipe[PIPE_READ], 0);
         execv(fileName, args);
     }
