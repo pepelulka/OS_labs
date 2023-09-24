@@ -14,8 +14,12 @@ enum {
 };
 
 void CreatePipe(int pipeFd[2]);
-char* ReadString(FILE* stream);
-bool Probability(int percentage);
 void CreateChildForPipe(char* fileName, int pipe[2], char** args);
+
+bool IsVowel(char c);
+bool Probability(int percentage);
+
+char* ReadString(FILE* stream);
+char* ReadStringAndRemoveVowels(FILE* stream);
 
 #endif //UTILS_H
