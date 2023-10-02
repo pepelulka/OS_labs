@@ -7,14 +7,14 @@ int main(int argc, char** argv) {
     }
 
     char* filename = argv[1];
-    FILE* file = fopen(filename, "wb");
+    FILE* file = fopen(filename, "w");
     if (file == NULL) {
         printf("Can't open file %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
     char* input;
-    while ((input = ReadStringAndRemoveVowels(stdin)) != NULL) {
+    while ((input = ReadString(stdin)) != NULL) {
         fprintf(file, "%s", input);
         fflush(file);
 

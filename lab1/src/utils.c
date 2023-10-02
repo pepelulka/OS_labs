@@ -33,14 +33,14 @@ bool Probability(int percentage) {
     return (rand() % 100) < percentage;
 }
 
-char *ReadString(FILE *stream) {
+char* ReadString(FILE *stream) {
     if (feof(stream)) {
         return NULL;
     }
 
     const size_t chunkSize = 256;
     size_t size = 256;
-    char *buffer = (char*)malloc(size * sizeof(char));
+    char* buffer = (char*)malloc(size * sizeof(char));
     size_t idx = 0;
 
     if(!buffer) {
@@ -48,9 +48,9 @@ char *ReadString(FILE *stream) {
         exit(EXIT_FAILURE);
     }
 
-    char cur;
+    int cur;
     while ((cur = getc(stream)) != EOF) {
-        buffer[idx++] = cur;
+        buffer[idx++] = (char)cur;
 
         if (idx == size) {
             size += chunkSize;
@@ -87,7 +87,7 @@ char* ReadStringAndRemoveVowels(FILE* stream) {
         exit(EXIT_FAILURE);
     }
 
-    char cur;
+    int cur;
     while ((cur = getc(stream)) != EOF) {
         if (!IsVowel(cur)) {
             buffer[idx++] = cur;
@@ -109,6 +109,7 @@ char* ReadStringAndRemoveVowels(FILE* stream) {
     }
 
     buffer[idx] = '\0';
+
 
     return buffer;
 }

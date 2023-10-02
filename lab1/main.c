@@ -4,5 +4,9 @@
 
 int main() {
     srand(time(NULL));
-    ParentRoutine("./child");
+    char* childProgramName;
+    if ((childProgramName = getenv("PATH_TO_CHILD")) == NULL) {
+        childProgramName = "./child";
+    }
+    ParentRoutine(childProgramName, stdin);
 }
