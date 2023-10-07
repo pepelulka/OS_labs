@@ -49,4 +49,5 @@ void ParentRoutine(char* childProgramPath, FILE* stream) {
     close(pipe1[PIPE_WRITE]);
     close(pipe2[PIPE_WRITE]);
     wait(NULL);
+    wait(NULL);
 }

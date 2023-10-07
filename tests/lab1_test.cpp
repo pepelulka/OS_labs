@@ -12,30 +12,18 @@ extern "C" {
     #include "parent.h"
 }
 
-TEST(Lab1, SimpleTest) {
-    std::string fileWithInput = "input.txt";
-    std::string fileWithOutput1 = "output1.txt";
-    std::string fileWithOutput2 = "output2.txt";
+using TStringVector = std::vector<std::string>;
 
-    constexpr int inputSize = 6;
+// const std::string fileWithInput = "input.txt";
+// const std::string fileWithOutput1 = "output1.txt";
+// const std::string fileWithOutput2 = "output2.txt";
 
-    std::array<std::string, inputSize> input = {
-        "",
-        "fffff",
-        "glazaglaza",
-        "kumaroid3000",
-        "meow meow meow",
-        "piiiiiiiiiiii"
-    };
-
-    std::array<std::string, inputSize> expectedOutput = {
-        "",
-        "fffff",
-        "glzglz",
-        "kmrd3000",
-        "mw mw mw",
-        "p"
-    };
+void Check(const TStringVector& input,
+           TStringVector expectedOutput,
+           std::string fileWithInput,
+           std::string fileWithOutput1,
+           std::string fileWithOutput2) {
+    size_t inputSize = input.size();
 
     {
         auto inFile = std::ofstream(fileWithInput);
@@ -73,9 +61,10 @@ TEST(Lab1, SimpleTest) {
         output.push_back(line);
     }
 
+    std::sort(expectedOutput.begin(), expectedOutput.end());
     std::sort(output.begin(), output.end());
 
-    EXPECT_EQ(output.size(), inputSize);
+    ASSERT_TRUE(output.size() == inputSize);
     for (size_t i = 0; i < output.size(); i++) {
         EXPECT_EQ(output[i], expectedOutput[i]);
     }
@@ -89,4 +78,50 @@ TEST(Lab1, SimpleTest) {
     removeIfExists(fileWithInput);
     removeIfExists(fileWithOutput1);
     removeIfExists(fileWithOutput2);
+}
+
+TEST(Lab1, Test1) {
+    TStringVector input = {
+        "",
+        "fffff",
+        "glazaglaza",
+        "kumaroid3000",
+        "meow meow meow",
+        "piiiiiiiiiiii"
+    };
+
+    TStringVector expectedOutput = {
+        "",
+        "fffff",
+        "glzglz",
+        "kmrd3000",
+        "mw mw mw",
+        "p"
+    };
+
+    Check(input, expectedOutput, "input1.txt", "output11.txt", "output12.txt");
+}
+
+TEST(Lab1, Test2) {
+    TStringVector input = {  };
+
+    TStringVector expectedOutput = {  };
+
+    Check(input, expectedOutput, "input2.txt", "output21.txt", "output22.txt");
+}
+
+TEST(Lab1, Test3) {
+    TStringVector input = { "" };
+
+    TStringVector expectedOutput = { "" };
+
+    Check(input, expectedOutput, "input3.txt", "output31.txt", "output32.txt");
+}
+
+TEST(Lab1, Test4) {
+    TStringVector input = { "bsakk" };
+
+    TStringVector expectedOutput = { "bskk" };
+
+    Check(input, expectedOutput, "input4.txt", "output41.txt", "output42.txt");
 }
