@@ -17,22 +17,24 @@ TEST(Lab1, SimpleTest) {
     std::string fileWithOutput1 = "output1.txt";
     std::string fileWithOutput2 = "output2.txt";
 
-    constexpr int inputSize = 5;
+    constexpr int inputSize = 6;
 
     std::array<std::string, inputSize> input = {
+        "",
         "fffff",
         "glazaglaza",
-        "piiiiiiiiiiii",
         "kumaroid3000",
-        "meow meow meow"
+        "meow meow meow",
+        "piiiiiiiiiiii"
     };
 
     std::array<std::string, inputSize> expectedOutput = {
+        "",
         "fffff",
         "glzglz",
-        "p"
         "kmrd3000",
-        "mw mw mw"
+        "mw mw mw",
+        "p"
     };
 
     {
@@ -74,7 +76,7 @@ TEST(Lab1, SimpleTest) {
     std::sort(output.begin(), output.end());
 
     EXPECT_EQ(output.size(), inputSize);
-    for (int i = 0; i < inputSize; i++) {
+    for (size_t i = 0; i < output.size(); i++) {
         EXPECT_EQ(output[i], expectedOutput[i]);
     }
 

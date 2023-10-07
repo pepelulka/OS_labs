@@ -14,7 +14,7 @@ enum {
 };
 
 void CreatePipe(int pipeFd[2]);
-void CreateChildForPipe(char* fileName, int pipe[2], char** args);
+void CreateChildForPipe(char* fileName, int pipe[2], int pipeToClose[2], char** args);
 
 bool IsVowel(char c);
 bool Probability(int percentage);

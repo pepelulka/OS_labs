@@ -7,7 +7,7 @@ void CreatePipe(int pipeFd[2]) {
     }
 }
 
-void CreateChildForPipe(char* fileName, int pipe[2], char** args) {
+void CreateChildForPipe(char* fileName, int pipe[2], int pipeToClose[2], char** args) {
     int pid = fork();
     if (pid == -1) {
         printf("Can't fork!\n");
@@ -15,7 +15,9 @@ void CreateChildForPipe(char* fileName, int pipe[2], char** args) {
     }
     if (pid == 0) {
         close(pipe[PIPE_WRITE]);
-        dup2(pipe[PIPE_READ], 0);
+        close(pipeToClose[PIPE_READ]);
+        close(pipeToClose[PIPE_WRITE]);
+        dup2(pipe[PIPE_READ], STDIN_FILENO);
         execv(fileName, args);
     }
 }

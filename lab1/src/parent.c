@@ -5,6 +5,8 @@ void ParentRoutine(char* childProgramPath, FILE* stream) {
 
     char *input1 = ReadString(stream);
     char *input2 = ReadString(stream);
+    int lenInput1 = strlen(input1);
+    int lenInput2 = strlen(input2);
     if (input1 == NULL || input2 == NULL) {
         printf("Error with input.\n");
         exit(EXIT_FAILURE);
@@ -14,6 +16,8 @@ void ParentRoutine(char* childProgramPath, FILE* stream) {
     strcpy(fileName2, input2);
     free(input1);
     free(input2);
+    fileName1[lenInput1 - 1] = '\0';
+    fileName2[lenInput2 - 1] = '\0';
 
     int pipe1[2], pipe2[2];
 
@@ -23,8 +27,8 @@ void ParentRoutine(char* childProgramPath, FILE* stream) {
     char* args1[] = {childProgramPath, fileName1, NULL};
     char* args2[] = {childProgramPath, fileName2, NULL};
 
-    CreateChildForPipe(childProgramPath, pipe1, args1);
-    CreateChildForPipe(childProgramPath, pipe2, args2);
+    CreateChildForPipe(childProgramPath, pipe1, pipe2, args1);
+    CreateChildForPipe(childProgramPath, pipe2, pipe1, args2);
 
     close(pipe1[PIPE_READ]);
     close(pipe2[PIPE_READ]);
