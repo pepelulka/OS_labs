@@ -64,8 +64,10 @@ typedef struct {
     // Multi-thread stuff
     // Firstly you must lock mutexForModification and then mutexForWorkers!!! (In order to avoid dead locks)
     pthread_mutex_t mutexForWorkers; // When you want to use queue, just lock its mutex, but do not unlock if size == 0
-    pthread_mutex_t mutexForModification;
     pthread_mutex_t mutexForZeroCount;
+    pthread_cond_t condVarForWorkers;
+    pthread_cond_t condVarForZeroCount;
+    pthread_mutex_t mutexForModification;
 } TTaskQueue;
 
 static TTaskQueueNode *TQNCreate(TMergeInputData data) {
@@ -86,9 +88,10 @@ TTaskQueue* TaskQueueCreate() {
     queue->first = NULL;
     queue->size = 0;
     queue->isTerminated = false;
+    pthread_cond_init(&queue->condVarForWorkers, NULL);
+    pthread_cond_init(&queue->condVarForZeroCount, NULL);
     pthread_mutex_init(&queue->mutexForWorkers, NULL);
     pthread_mutex_init(&queue->mutexForZeroCount, NULL);
-    pthread_mutex_lock(&queue->mutexForWorkers);
     pthread_mutex_init(&queue->mutexForModification, NULL);
     return queue;
 }
@@ -96,7 +99,7 @@ TTaskQueue* TaskQueueCreate() {
 void TaskQueueTerminate(TTaskQueue *queue) {
     pthread_mutex_lock(&queue->mutexForModification);
     queue->isTerminated = true;
-    pthread_mutex_unlock(&queue->mutexForWorkers);
+    pthread_cond_broadcast(&queue->condVarForWorkers);
     pthread_mutex_unlock(&queue->mutexForModification);
 }
 
@@ -113,6 +116,8 @@ void TaskQueueDestroy(TTaskQueue *queue) {
     pthread_mutex_destroy(&queue->mutexForModification);
     pthread_mutex_destroy(&queue->mutexForWorkers);
     pthread_mutex_destroy(&queue->mutexForZeroCount);
+    pthread_cond_destroy(&queue->condVarForWorkers);
+    pthread_cond_destroy(&queue->condVarForZeroCount);
     free(queue);
 }
 
@@ -130,24 +135,23 @@ void TaskQueuePush(TTaskQueue *queue, TMergeInputData data) {
         queue->last = node;
     }
     queue->size++;
-    pthread_mutex_unlock(&queue->mutexForWorkers);
-    pthread_mutex_trylock(&queue->mutexForZeroCount);
+    pthread_cond_signal(&queue->condVarForWorkers);
     pthread_mutex_unlock(&queue->mutexForModification);
 }
 
 bool TaskQueuePop(TTaskQueue *queue, TMergeInputData *resultPtr) {
-    pthread_mutex_lock(&queue->mutexForWorkers);
     pthread_mutex_lock(&queue->mutexForModification);
+    while (queue->size == 0 && queue->isTerminated != true) {
+        printf("{\n");
+        pthread_cond_wait(&queue->condVarForWorkers, &queue->mutexForModification);
+        printf("}\n");
+    }
+    if (queue->isTerminated) {
+        pthread_mutex_unlock(&queue->mutexForModification);
+        return false;
+    }
     if (queue->size == 0) {
-        if (queue->isTerminated) {
-            pthread_mutex_unlock(&queue->mutexForWorkers);
-            pthread_mutex_unlock(&queue->mutexForModification);
-            return false;
-        } else {
-            printf("Error!\n");
-            printf("Queue - size: %ld\n", queue->size);
-            assert(false && "Something definetely went wrong.");
-        }
+        assert(false && "Something went wrong!");
     }
     TMergeInputData result;
     if (queue->size == 1) {
@@ -166,11 +170,8 @@ bool TaskQueuePop(TTaskQueue *queue, TMergeInputData *resultPtr) {
         TQNDestroy(temp);
     }
     queue->size--;
-    if (queue->size != 0 || (queue->isTerminated == true)) {
-        pthread_mutex_unlock(&queue->mutexForWorkers);
-    }
     if (queue->size == 0) {
-        pthread_mutex_unlock(&queue->mutexForZeroCount);
+        pthread_cond_signal(&queue->condVarForZeroCount);
     }
     pthread_mutex_unlock(&queue->mutexForModification);
     *resultPtr = result;
@@ -178,9 +179,9 @@ bool TaskQueuePop(TTaskQueue *queue, TMergeInputData *resultPtr) {
 }
 
 void WaitUntilAllTaskDone(TTaskQueue *queue) {
-    pthread_mutex_lock(&queue->mutexForZeroCount);
-    pthread_mutex_unlock(&queue->mutexForZeroCount);
-    queue->isTerminated = queue->isTerminated;
+    pthread_mutex_lock(&queue->mutexForModification);
+    pthread_cond_wait(&queue->condVarForZeroCount, &queue->mutexForModification);
+    pthread_mutex_unlock(&queue->mutexForModification);
 }
 
 // Task queue <<END>>
