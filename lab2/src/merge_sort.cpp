@@ -74,10 +74,11 @@ static void* MergeRaw(void *data) {
 }
 
 void ParallelMergeSort(std::vector<int> &vec, size_t threadCount) {
-    using TTask = tq::TTaskQueue::TTask;
+    using TTask = tp::TThreadPool::TTask;
 
     size_t size = vec.size();
     std::vector<int> extra(size);
+    tp::TThreadPool tpool(threadCount);
     for (size_t k = 1; k < size; k *= 2) {
         // %%% <%OPT>
         if (k <= 2) {
@@ -96,8 +97,8 @@ void ParallelMergeSort(std::vector<int> &vec, size_t threadCount) {
             continue;
         }
         // %% <%/OPT>
-        tq::TTaskQueue queue;
         // Segments of the array to merge
+        int ptr = 0;
         for (int i = 0; i + k < size; i += 2 * k) {
             size_t l1, r1, l2, r2;
             size_t extraStart = i;
@@ -109,16 +110,17 @@ void ParallelMergeSort(std::vector<int> &vec, size_t threadCount) {
             } else {
                 r2 = size - 1;
             }
-            queue.PushTask(TTask{&MergeRaw, std::make_shared<TMergeRawInputData>
-                                (TMergeRawInputData(&vec, 
-                                                    &extra, 
-                                                    {l1, r1}, 
-                                                    {l2, r2},
-                                                    extraStart))});
+            tpool.PushTask(ptr % threadCount, TTask{&MergeRaw, std::make_shared<TMergeRawInputData>
+                                                    (TMergeRawInputData(&vec, 
+                                                                        &extra, 
+                                                                        {l1, r1}, 
+                                                                        {l2, r2},
+                                                                        extraStart))});
+            ptr++;
         }
-        queue.Terminate();
-        tq::ExecuteThreadPool(queue, threadCount);
+        tpool.Execute();
     }
+    tpool.Terminate();
 }
 
 }

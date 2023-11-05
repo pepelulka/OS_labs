@@ -1,5 +1,5 @@
 add_library(lab2_lib
-                src/task_queue.cpp
+                src/thread_pool.cpp
                 src/merge_sort.cpp
                 src/timer.cpp)
 

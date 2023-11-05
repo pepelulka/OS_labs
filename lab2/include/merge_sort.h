@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "task_queue.h"
+#include "thread_pool.h"
 
 namespace lab2 {
 
