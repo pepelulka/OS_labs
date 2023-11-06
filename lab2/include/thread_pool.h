@@ -22,7 +22,7 @@ public:
 
     struct TTask {
         TaskFunction func;
-        std::shared_ptr<void> data;
+        void* data;
     };
 
     TThreadPool() = delete;
@@ -36,26 +36,30 @@ public:
 private:
 
     struct TThread {
-        TThreadPool *owner;
         HANDLE thread;
+        int a;
+        TThreadPool *owner;
+        int b;
         // Queue
         CRITICAL_SECTION csQueue;
         CONDITION_VARIABLE cvQueue;
 
         std::queue<TTask> queue;
+        int c = 13;
 
-        static void WINAPI ThreadRoutine(PVOID data);
+        static unsigned WINAPI ThreadRoutine(PVOID data);
+        void Start();
 
         TThread() {
             InitializeCriticalSection(&csQueue);
             InitializeConditionVariable(&cvQueue);
-            thread = (HANDLE)_beginthread(&ThreadRoutine, 0, this);
+            // thread = (HANDLE)_beginthreadex(0, 0, &ThreadRoutine, this, 0, 0);
         }
 
         ~TThread() {
             DeleteCriticalSection(&csQueue);
-            WaitForSingleObject(thread, INFINITE);
-            CloseHandle(thread);
+            // WaitForSingleObject(thread, INFINITE);
+            // CloseHandle(thread);
         }
     }; 
 

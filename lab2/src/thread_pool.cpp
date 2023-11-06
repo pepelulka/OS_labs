@@ -8,9 +8,11 @@ TThreadPool::TThreadPool(WORD threadNum) {
     isTerminated = false;
     this->counter.ResetAndSetTarget(threadNum);
     this->threadNum = threadNum;
+    // Dangerous!! May be reallocation inside vector!
     this->threads.resize(threadNum);
-    for (auto &th : this->threads) {
-        th.owner = this;
+    for (WORD i = 0; i < threadNum; i++) {
+        this->threads[i].owner = this;
+        this->threads[i].Start();
     }
     this->counter.WaitTarget();
     this->counter.ResetAndSetTarget(threadNum);
@@ -44,22 +46,24 @@ void TThreadPool::Terminate() {
     }
 }
 
-void WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
+unsigned WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
     // std::cout << "start\n";
     TThread *thread = (TThread*)data;
     while (true) {
         EnterCriticalSection(&thread->csQueue);
         // std::cout << "loop--\n";
         while (!thread->queue.empty()) {
+            // std::cout << "Meow " << GetCurrentThreadId() << std::endl;
             TTask task = thread->queue.front();
             thread->queue.pop();
-            task.func(task.data.get());
+            task.func(task.data);
+            // std::cout << "Meow end" << GetCurrentThreadId() << std::endl;
             // std::cout << "task\n";
         }
         if (thread->owner->isTerminated) {
             LeaveCriticalSection(&thread->csQueue);
             thread->owner->counter.Inc();
-            return ;
+            return 0;
         }
         thread->owner->counter.Inc();
         // std::cout << "I sleep\n";
@@ -67,6 +71,11 @@ void WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
         // std::cout << "Wake up\n";
         LeaveCriticalSection(&thread->csQueue);
     }
+    return 0;
+}
+
+void TThreadPool::TThread::Start() {
+    thread = (HANDLE)_beginthreadex(0, 0, &ThreadRoutine, this, 0, 0);
 }
 
 }

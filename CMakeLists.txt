@@ -5,9 +5,9 @@ project(OS_LABS C CXX)
 enable_testing()
 
 if (MSVC)
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4 /WX -g3)
 else()
-    add_compile_options(-Wall -Wextra -pedantic -Werror -g)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -g3)
 endif()
 
 include(FindThreads)

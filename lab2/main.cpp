@@ -47,10 +47,10 @@ int main(int argc, char **argv) {
 
     TIMER_START;
     ParallelMergeSort(b, threadNum);
-    for (auto i : b) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
+    // for (auto i : b) {
+    //     std::cout << i << " ";
+    // }
+    // std::cout << std::endl;
     TIMER_END;
 
     assert(Check(a));
