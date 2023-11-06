@@ -20,12 +20,12 @@ TThreadPool::TThreadPool(WORD threadNum) {
 
 TThreadPool::~TThreadPool() { }
 
-void TThreadPool::PushTask(WORD thread, TTask task) {
+VOID TThreadPool::PushTask(WORD thread, TTask task) {
     assert(thread < threadNum);
     threads[thread].queue.push(task);
 }
 
-void TThreadPool::Execute() {
+VOID TThreadPool::Execute() {
     for (auto &th : threads) {
         EnterCriticalSection(&th.csQueue);
         WakeConditionVariable(&th.cvQueue);
@@ -35,7 +35,7 @@ void TThreadPool::Execute() {
     this->counter.ResetAndSetTarget(threadNum);
 }
 
-void TThreadPool::Terminate() {
+VOID TThreadPool::Terminate() {
     isTerminated = true;
     Execute();
     for (auto &th : threads) {
@@ -65,7 +65,7 @@ unsigned WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
     return 0;
 }
 
-void TThreadPool::TThread::Start() {
+VOID TThreadPool::TThread::Start() {
     thread = (HANDLE)_beginthreadex(0, 0, &ThreadRoutine, this, 0, 0);
 }
 

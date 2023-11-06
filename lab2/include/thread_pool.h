@@ -18,36 +18,33 @@ namespace tp {
 
 class TThreadPool final {
 public:
-    using TaskFunction = std::function<void(void*)>;
+    using TaskFunction = std::function<VOID(PVOID)>;
 
     struct TTask {
         TaskFunction func;
-        void* data;
+        PVOID data;
     };
 
     TThreadPool() = delete;
     TThreadPool(WORD threadNum);
     ~TThreadPool();
 
-    void PushTask(WORD thread, TTask task);
-    void Execute();
-    void Terminate();
+    VOID PushTask(WORD thread, TTask task);
+    VOID Execute();
+    VOID Terminate();
 private:
 
     struct TThread {
         HANDLE thread;
-        int a;
         TThreadPool *owner;
-        int b;
         // Queue
         CRITICAL_SECTION csQueue;
         CONDITION_VARIABLE cvQueue;
 
         std::queue<TTask> queue;
-        int c = 13;
 
         static unsigned WINAPI ThreadRoutine(PVOID data);
-        void Start();
+        VOID Start();
 
         TThread() {
             InitializeCriticalSection(&csQueue);
