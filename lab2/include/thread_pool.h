@@ -29,7 +29,6 @@ public:
     TThreadPool(WORD threadNum);
     ~TThreadPool();
 
-    // PushTask called only after WaitThreadPool(), otherwise - UB
     void PushTask(WORD thread, TTask task);
     void Execute();
     void Terminate();
@@ -53,13 +52,10 @@ private:
         TThread() {
             InitializeCriticalSection(&csQueue);
             InitializeConditionVariable(&cvQueue);
-            // thread = (HANDLE)_beginthreadex(0, 0, &ThreadRoutine, this, 0, 0);
         }
 
         ~TThread() {
             DeleteCriticalSection(&csQueue);
-            // WaitForSingleObject(thread, INFINITE);
-            // CloseHandle(thread);
         }
     }; 
 

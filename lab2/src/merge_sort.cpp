@@ -27,7 +27,6 @@ static void Merge(std::vector<int> &vec, TSegment lseg, TSegment rseg,
         }
         extraPtr++;
     }
-    // std::copy %%%
     for (size_t i = extraArrayStart; i < extraPtr; i++) {
         vec[l1 + i - extraArrayStart] = extra[i];
     }
@@ -81,7 +80,7 @@ void ParallelMergeSort(std::vector<int> &vec, size_t threadCount) {
     tp::TThreadPool tpool(threadCount);
     for (size_t k = 1; k < size; k *= 2) {
         // %%% <%OPT>
-        if (k <= 2) {
+        if (k <= 4) {
             for (int i = 0; i + k < size; i += 2 * k) {
                 size_t l1, r1, l2, r2;
                 l1 = i;

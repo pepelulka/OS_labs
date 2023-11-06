@@ -11,3 +11,8 @@ add_library(GTest::GTest INTERFACE IMPORTED)
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 set(CMAKE_CXX_STANDARD 17)
+
+add_executable(lab2_test lab2_test.cpp)
+
+target_link_libraries(lab2_test PRIVATE GTest::GTest lab2_lib)
+target_include_directories(lab2_test PRIVATE ${CMAKE_SOURCE_DIR}/lab2/include)

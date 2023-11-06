@@ -37,9 +37,7 @@ void TThreadPool::Execute() {
 
 void TThreadPool::Terminate() {
     isTerminated = true;
-    // std::cout << "Termination!\n";
     Execute();
-    // std::cout << "Yeah bitch\n";
     for (auto &th : threads) {
         WaitForSingleObject(th.thread, INFINITE);
         CloseHandle(th.thread);
@@ -47,18 +45,13 @@ void TThreadPool::Terminate() {
 }
 
 unsigned WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
-    // std::cout << "start\n";
     TThread *thread = (TThread*)data;
     while (true) {
         EnterCriticalSection(&thread->csQueue);
-        // std::cout << "loop--\n";
         while (!thread->queue.empty()) {
-            // std::cout << "Meow " << GetCurrentThreadId() << std::endl;
             TTask task = thread->queue.front();
             thread->queue.pop();
             task.func(task.data);
-            // std::cout << "Meow end" << GetCurrentThreadId() << std::endl;
-            // std::cout << "task\n";
         }
         if (thread->owner->isTerminated) {
             LeaveCriticalSection(&thread->csQueue);
@@ -66,9 +59,7 @@ unsigned WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
             return 0;
         }
         thread->owner->counter.Inc();
-        // std::cout << "I sleep\n";
         SleepConditionVariableCS(&thread->cvQueue, &thread->csQueue, INFINITE);
-        // std::cout << "Wake up\n";
         LeaveCriticalSection(&thread->csQueue);
     }
     return 0;

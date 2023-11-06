@@ -29,17 +29,23 @@ bool Check(const std::vector<int> &vec) {
     return true;
 }
 
+// Usage:
+// <executable> <filename> <thread-count>
 int main(int argc, char **argv) {
     int threadNum = 1;
-    if (argc == 2) {
-        threadNum = std::atoi(argv[1]);
+    std::string filename = "vec.txt";
+    if (argc >= 2) {
+        filename = std::string(argv[1]);
+    }
+    if (argc >= 3) {
+        threadNum = std::atoi(argv[2]);
     }
 
     TIMER_INIT;
 
-    std::vector<int> a = ReadFromFile("vec.txt");
+    std::vector<int> a = ReadFromFile(filename);
     std::vector<int> b = a;
-    std::cout << "Read vector from file vec.txt\n";
+    std::cout << "Read vector from file " << filename << std::endl;
     
     TIMER_START;
     MergeSort(a);
@@ -47,10 +53,6 @@ int main(int argc, char **argv) {
 
     TIMER_START;
     ParallelMergeSort(b, threadNum);
-    // for (auto i : b) {
-    //     std::cout << i << " ";
-    // }
-    // std::cout << std::endl;
     TIMER_END;
 
     assert(Check(a));
