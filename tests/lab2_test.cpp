@@ -7,37 +7,45 @@
 using namespace lab2;
 using namespace gen;
 
-bool Check(const std::vector<int> &vec) {
-    for (size_t i = 0; i + 1 < vec.size(); i++) {
-        if (vec[i + 1] < vec[i]) {
-            return false;
-        }
-    }
-    return true;
+constexpr size_t N = 100000;
+
+TEST(Lab2, SortedTest) {
+    std::vector<int> vec = GenerateSorted(N);
+    MergeSort(vec);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+
+    vec = GenerateSorted(N);
+    ParallelMergeSort(vec, 2);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+    vec = GenerateSorted(N);
+    ParallelMergeSort(vec, 8);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
 }
 
-TEST(Lab2, BasicTest) {
-    constexpr size_t N = 100000;
+TEST(Lab2, ReversedTest) {
+    std::vector<int> vec = GenerateReversed(N);
+    MergeSort(vec);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
 
-    std::vector<int> vec1 = GenerateSorted(N);
-    std::vector<int> vec2 = GenerateReversed(N);
-    std::vector<int> vec3 = GenerateRandomShuffle(N);
-    MergeSort(vec1);
-    MergeSort(vec2);
-    MergeSort(vec3);
-    EXPECT_TRUE(Check(vec1));
-    EXPECT_TRUE(Check(vec2));
-    EXPECT_TRUE(Check(vec3));
+    vec = GenerateReversed(N);
+    ParallelMergeSort(vec, 2);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+    vec = GenerateReversed(N);
+    ParallelMergeSort(vec, 8);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+}
 
-    vec1 = GenerateSorted(N);
-    vec2 = GenerateReversed(N);
-    vec3 = GenerateRandomShuffle(N);
-    ParallelMergeSort(vec1, 2);
-    ParallelMergeSort(vec2, 4);
-    ParallelMergeSort(vec3, 8);
-    EXPECT_TRUE(Check(vec1));
-    EXPECT_TRUE(Check(vec2));
-    EXPECT_TRUE(Check(vec3));
+TEST(Lab2, RandomShuffleTest) {
+    std::vector<int> vec = GenerateRandomShuffle(N);
+    MergeSort(vec);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+
+    vec = GenerateRandomShuffle(N);
+    ParallelMergeSort(vec, 2);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+    vec = GenerateRandomShuffle(N);
+    ParallelMergeSort(vec, 8);
+    EXPECT_TRUE(std::is_sorted(vec.begin(), vec.end()));
 }
 
 TEST(Lab2, SpeedTest) {
@@ -55,7 +63,7 @@ TEST(Lab2, SpeedTest) {
         timer.reset();
         MergeSort(vec1);
         time1 += timer.get();
-        EXPECT_TRUE(Check(vec1));
+        EXPECT_TRUE(std::is_sorted(vec1.begin(), vec1.end()));
     }
 
     for (size_t i = 0; i < N_TESTS; i++) {
@@ -63,8 +71,8 @@ TEST(Lab2, SpeedTest) {
         timer.reset();
         ParallelMergeSort(vec1, N_THREADS);
         time2 += timer.get();
-        EXPECT_TRUE(Check(vec1));
+        EXPECT_TRUE(std::is_sorted(vec1.begin(), vec1.end()));
     }
 
-    EXPECT_TRUE(time1 > time2);
+    EXPECT_GT(time1, time2);
 }

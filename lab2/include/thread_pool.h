@@ -22,7 +22,7 @@ public:
 
     struct TTask {
         TaskFunction func;
-        PVOID data;
+        std::shared_ptr<VOID> data;
     };
 
     TThreadPool() = delete;

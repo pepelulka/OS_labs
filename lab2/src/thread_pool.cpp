@@ -51,7 +51,7 @@ unsigned WINAPI TThreadPool::TThread::ThreadRoutine(PVOID data) {
         while (!thread->queue.empty()) {
             TTask task = thread->queue.front();
             thread->queue.pop();
-            task.func(task.data);
+            task.func(task.data.get());
         }
         if (thread->owner->isTerminated) {
             LeaveCriticalSection(&thread->csQueue);

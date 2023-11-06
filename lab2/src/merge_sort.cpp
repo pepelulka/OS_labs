@@ -109,11 +109,11 @@ void ParallelMergeSort(std::vector<int> &vec, size_t threadCount) {
             } else {
                 r2 = size - 1;
             }
-            void * data = static_cast<void*>(new TMergeRawInputData(&vec, 
-                                                                    &extra, 
-                                                                    {l1, r1}, 
-                                                                    {l2, r2},
-                                                                    extraStart));
+            auto data = std::make_shared<TMergeRawInputData>(TMergeRawInputData(&vec, 
+                                                                                &extra, 
+                                                                                {l1, r1}, 
+                                                                                {l2, r2},
+                                                                                extraStart));
             tpool.PushTask(ptr % threadCount, TTask{&MergeRaw, data});
             ptr++;
         }

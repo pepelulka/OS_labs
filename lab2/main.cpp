@@ -20,15 +20,6 @@ std::vector<int> ReadFromFile(const std::string &fileName) {
     return result;
 }
 
-bool Check(const std::vector<int> &vec) {
-    for (size_t i = 0; i + 1 < vec.size(); i++) {
-        if (vec[i + 1] < vec[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 // Usage:
 // <executable> <filename> <thread-count>
 int main(int argc, char **argv) {
@@ -41,20 +32,20 @@ int main(int argc, char **argv) {
         threadNum = std::atoi(argv[2]);
     }
 
-    TIMER_INIT;
+    Timer timer;
 
     std::vector<int> a = ReadFromFile(filename);
     std::vector<int> b = a;
     std::cout << "Read vector from file " << filename << std::endl;
     
-    TIMER_START;
+    timer.reset();
     MergeSort(a);
-    TIMER_END;
+    std::cout << "time1: " << timer.get() << "ms\n"; 
 
-    TIMER_START;
+    timer.reset();
     ParallelMergeSort(b, threadNum);
-    TIMER_END;
+    std::cout << "time2: " << timer.get() << "ms\n"; 
 
-    assert(Check(a));
-    assert(Check(b));
+    assert(std::is_sorted(a.begin(), a.end()));
+    assert(std::is_sorted(b.begin(), b.end()));
 }
