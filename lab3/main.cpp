@@ -5,12 +5,12 @@
 using namespace lab3;
 
 int main() {
-    std::string pathToChild;
+    char* pathToChild;
     if (getenv("PATH_TO_CHILD")) {
-        pathToChild = std::string(getenv("PATH_TO_CHILD"));
+        pathToChild = getenv("PATH_TO_CHILD");
     } else {
-        pathToChild = "child.exe";
-        std::cout << "Warning: PATH_TO_CHILD is not specified. Using default value 'child.exe'\n";
+        std::cerr << "Error: PATH_TO_CHILD is not specified.\n";
+        exit(EXIT_FAILURE);
     }
-    ParentRoutine("child.exe", std::cin);
+    ParentRoutine(pathToChild, std::cin);
 }

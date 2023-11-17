@@ -26,8 +26,8 @@ private:
     // Writing:
     size_t bytesWritten = 0;
 public:
-    const static size_t DEFAULT_MAP_SIZE = 1024; 
-    const static size_t HEADER_SIZE = 4;
+    constexpr const static size_t DEFAULT_MAP_SIZE = 1024; 
+    constexpr const static size_t HEADER_SIZE = 4;
 
     // mode == 'r' or mode == 'w'
     TMMap(

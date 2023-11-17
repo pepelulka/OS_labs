@@ -8,7 +8,7 @@
 
 namespace lab3 {
 
-void ParentRoutine(const std::string& pathToChild, std::istream &in);
+void ParentRoutine(const char* pathToChild, std::istream &in);
 
 }
 

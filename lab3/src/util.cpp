@@ -14,19 +14,19 @@ TMMap::TMMap(
     } else if (mode == 'w') {
         readingMode = false;
     } else {
-        throw std::invalid_argument("Expected mode == 'c' or 'w'");
+        throw std::invalid_argument("Expected mode == 'r' or 'w'");
     }
     // Create mmap
     mmap = CreateFileMappingA(
         INVALID_HANDLE_VALUE,
-        NULL,
+        nullptr,
         PAGE_READWRITE,
         0,
         bufferSize,
         mmapName.c_str()
     );
 
-    if (mmap == NULL) {
+    if (mmap == nullptr) {
         throw std::logic_error("Can't create mmap");
     }
 
@@ -48,7 +48,6 @@ void TMMap::Write(const std::string& line) {
     }
     if (bytesWritten + line.size() > psize) {
         throw std::overflow_error("Buffer overflow.");
-        return;
     }
     uint32_t* uintView = (uint32_t*)view;
     char * bufferTop = (char*)view + HEADER_SIZE + bytesWritten;
@@ -83,12 +82,12 @@ Process::Process(const std::string &path, const std::vector<std::string> &args) 
     strcpy(rawArgs, cmdArgs.c_str());
     if(!CreateProcessA(path.c_str(),
                        rawArgs,
-                       NULL,
-                       NULL,
+                       nullptr,
+                       nullptr,
                        TRUE,
                        0,
-                       NULL,
-                       NULL,
+                       nullptr,
+                       nullptr,
                        &si,
                        &info)) {
         throw std::logic_error("Can't create new process.");

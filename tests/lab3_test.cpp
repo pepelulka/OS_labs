@@ -12,14 +12,6 @@
 
 #include "windows.h"
 
-BOOL FileExists(const char * szPath)
-{
-  DWORD dwAttrib = GetFileAttributesA(szPath);
-
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
-         !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
 #endif
 
 namespace fs = std::filesystem;
@@ -28,33 +20,46 @@ using TStringVector = std::vector<std::string>;
 
 using namespace lab3;
 
+const std::string inFileName = "input.txt";
+const std::string outFile1Name = "output1.txt";
+const std::string outFile2Name = "output2.txt";
+
+void RemoveFileIfExists (const std::string& path) {
+#ifdef  _WIN32
+    if (fs::exists(path)) {
+        DeleteFileA(path.c_str());
+    }
+#else
+    if (fs::exists(path)) {
+        fs::remove(path);
+    }
+#endif   
+}
+
 void Check(const TStringVector& input,
-           TStringVector expectedOutput,
-           std::string fileWithInput,
-           std::string fileWithOutput1,
-           std::string fileWithOutput2) {
+           TStringVector expectedOutput) {
     size_t inputSize = input.size();
 
     {
-        auto inFile = std::ofstream(fileWithInput);
+        auto inFile = std::ofstream(inFileName);
 
-        inFile << fileWithOutput1 << '\n';
-        inFile << fileWithOutput2 << '\n';
+        inFile << outFile1Name << '\n';
+        inFile << outFile2Name << '\n';
 
         for(const auto& line : input) {
             inFile << line << '\n';
         }
     }
 
-    std::ifstream inFile(fileWithInput);
+    std::ifstream inFile(inFileName);
 
     if (getenv("PATH_TO_CHILD") == NULL) {
         printf("WARNING: PATH_TO_CHILD was not specified.\n");
     }
     ParentRoutine(getenv("PATH_TO_CHILD"), inFile);
 
-    auto outFile1 = std::ifstream(fileWithOutput1);
-    auto outFile2 = std::ifstream(fileWithOutput2);
+    auto outFile1 = std::ifstream(outFile1Name);
+    auto outFile2 = std::ifstream(outFile2Name);
 
     ASSERT_TRUE(outFile1.good());
     ASSERT_TRUE(outFile2.good());
@@ -75,22 +80,9 @@ void Check(const TStringVector& input,
         EXPECT_EQ(output[i], expectedOutput[i]);
     }
 
-    auto removeIfExists = [](const std::string& path) {
-#ifdef  _WIN32
-        if (FileExists(path.c_str())) {
-            DeleteFileA(path.c_str());
-        }
-#else
-        if (fs::exists(path)) {
-            fs::remove(path);
-        }
-#endif
-        
-    };
-
-    removeIfExists(fileWithInput);
-    removeIfExists(fileWithOutput1);
-    removeIfExists(fileWithOutput2);
+    inFile.close();
+    outFile1.close();
+    outFile2.close();
 }
 
 TEST(Lab1, Test1) {
@@ -112,7 +104,7 @@ TEST(Lab1, Test1) {
         "p"
     };
 
-    Check(input, expectedOutput, "input1.txt", "output11.txt", "output12.txt");
+    Check(input, expectedOutput);
 }
 
 TEST(Lab1, Test2) {
@@ -120,7 +112,7 @@ TEST(Lab1, Test2) {
 
     TStringVector expectedOutput = {  };
 
-    Check(input, expectedOutput, "input2.txt", "output21.txt", "output22.txt");
+    Check(input, expectedOutput);
 }
 
 TEST(Lab1, Test3) {
@@ -128,7 +120,7 @@ TEST(Lab1, Test3) {
 
     TStringVector expectedOutput = { "" };
 
-    Check(input, expectedOutput, "input3.txt", "output31.txt", "output32.txt");
+    Check(input, expectedOutput);
 }
 
 TEST(Lab1, Test4) {
@@ -136,5 +128,14 @@ TEST(Lab1, Test4) {
 
     TStringVector expectedOutput = { "bskk" };
 
-    Check(input, expectedOutput, "input4.txt", "output41.txt", "output42.txt");
+    Check(input, expectedOutput);
+}
+
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    int result = RUN_ALL_TESTS();
+    RemoveFileIfExists(inFileName);
+    RemoveFileIfExists(outFile1Name);
+    RemoveFileIfExists(outFile2Name);
+    return result;
 }

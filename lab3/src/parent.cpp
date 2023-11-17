@@ -10,9 +10,9 @@ namespace lab3 {
 const std::string mmap1Name = "pepe_mmap_1";
 const std::string mmap2Name = "pepe_mmap_2";
 
-const size_t firstProcessProbability = 80;
+void ParentRoutine(const char* pathToChild, std::istream &in) {
+    const size_t firstProcessProbability = 80;
 
-void ParentRoutine(const std::string& pathToChild, std::istream &in) {
     util::Randomizer rand;
     std::string file1, file2;
     std::getline(in, file1);
