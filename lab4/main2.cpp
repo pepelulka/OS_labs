@@ -164,11 +164,11 @@ public:
 
 int main() {
     if (getenv("PATH_TO_LIB1") == nullptr) {
-        std::cout << "PATH_TO_LIB1 is not specified\n";
+        std::cerr << "PATH_TO_LIB1 is not specified\n";
         exit(1);
     }
     if (getenv("PATH_TO_LIB2") == nullptr) {
-        std::cout << "PATH_TO_LIB2 is not specified\n";
+        std::cerr << "PATH_TO_LIB2 is not specified\n";
         exit(1);
     }
     TMainRoutine routine(getenv("PATH_TO_LIB1"), getenv("PATH_TO_LIB2"));
