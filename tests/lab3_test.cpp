@@ -33,7 +33,7 @@ void RemoveFileIfExists (const std::string& path) {
     if (fs::exists(path)) {
         fs::remove(path);
     }
-#endif   
+#endif
 }
 
 void Check(const TStringVector& input,
