@@ -1,0 +1,37 @@
+{
+    "path_to_bins": "/home/pepelulka/Desktop/os/OS_labs/data/cp/ex1/bin/",
+
+    "jobs": [
+        {
+            "name": "job1",
+            "path": "job1"
+        },
+        {
+            "name": "job2",
+            "path": "job2"
+        },
+        {
+            "name": "job3",
+            "path": "job3"
+        }
+    ],
+
+    "dependencies": [
+        {
+            "required": "job1",
+            "target": "job3"
+        },
+        {
+            "required": "job2",
+            "target": "job3"
+        }
+    ],
+
+    "mutexes": [
+        {
+            "name": "mutex1",
+            "who_owns": ["job1", "job2"]
+        }
+    ]
+
+}

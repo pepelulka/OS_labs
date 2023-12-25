@@ -1,0 +1,109 @@
+{
+    "path_to_bins": "/home/pepelulka/Desktop/os/OS_labs/data/cp/ex2/bin/",
+
+    "jobs": [
+        {
+            "name": "job1",
+            "path": "job1"
+        },
+        {
+            "name": "job2",
+            "path": "job2"
+        },
+        {
+            "name": "job3",
+            "path": "job3"
+        },
+        {
+            "name": "job4",
+            "path": "job4"
+        },
+        {
+            "name": "job5",
+            "path": "job5"
+        },
+        {
+            "name": "job6",
+            "path": "job6"
+        },
+        {
+            "name": "job7",
+            "path": "job7"
+        },
+        {
+            "name": "job8",
+            "path": "job8"
+        },
+        {
+            "name": "job9",
+            "path": "job9"
+        },
+        {
+            "name": "job10",
+            "path": "job10"
+        },
+        {
+            "name": "job11",
+            "path": "job11"
+        }
+    ],
+
+    "dependencies": [
+        {
+            "required": "job1",
+            "target": "job6"
+        },
+        {
+            "required": "job2",
+            "target": "job6"
+        },
+        {
+            "required": "job3",
+            "target": "job6"
+        },
+        {
+            "required": "job4",
+            "target": "job6"
+        },
+        {
+            "required": "job4",
+            "target": "job7"
+        },
+        {
+            "required": "job5",
+            "target": "job7"
+        },
+        {
+            "required": "job6",
+            "target": "job8"
+        },
+        {
+            "required": "job7",
+            "target": "job8"
+        },
+        {
+            "required": "job8",
+            "target": "job9"
+        },
+        {
+            "required": "job9",
+            "target": "job10"
+        },
+        {
+            "required": "job9",
+            "target": "job11"
+        }
+    ],
+
+    "mutexes": [
+        {
+            "name": "mutex1",
+            "who_owns": ["job1", "job2", "job3"]
+        },
+        {
+            "name": "mutex2",
+            "who_owns": ["job6", "job7"]
+        }
+    ]
+
+}
