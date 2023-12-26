@@ -16,12 +16,9 @@ using Port = size_t;
 const Port LOWER_PORT = 5555;
 const Port UPPER_PORT = 5600;
 
-int CreateProcess(const std::string &path, NodeId id, Port pullPort, Port pushPort) {
-    int pid = fork();
-    if (pid == 0) {
-        execl(path.c_str(), path.c_str(), std::to_string(id).c_str(), std::to_string(pullPort).c_str(), std::to_string(pushPort).c_str(), nullptr);
-    }
-    return pid;
-}
+// ms
+const size_t PING_TIME = 500;
+
+int CreateProcess(const std::string &path, NodeId id, Port pullPort, Port pushPort, Port pingPort);
 
 }
