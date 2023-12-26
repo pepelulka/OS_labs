@@ -68,11 +68,11 @@ bool TDagJobExecutor::Execute(TJobDag &dag) {
         return true;
     }
 
-    std::set<std::string> executionQueue;
+    std::set<std::string_view> executionQueue;
     for (const auto& p : dag.jobs) {
         executionQueue.insert(p.first);
     }
-    std::map<std::string, int> countOfDeps;
+    std::map<std::string_view, int> countOfDeps;
     for (const auto& p : dag.dep) {
         countOfDeps[p.first] = p.second.size();
     }
