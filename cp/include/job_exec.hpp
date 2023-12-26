@@ -15,21 +15,7 @@ namespace cp {
 
 class TSystem {
 public:
-    static int Exec(const std::string& path) {
-        int pid = fork();
-        if (pid == 0) {
-            if (execl(path.c_str(), path.c_str(), nullptr) == -1) {
-                std::cout << "Can't exec\n";
-            }
-        } else if (pid == -1) {
-            throw std::logic_error("Can't fork");
-        } else {
-            int status;
-            waitpid(pid, &status, 0);
-            return status;
-        }
-        return 0;
-    }
+    static int Exec(const std::string& path);
 };
 
 struct LogStack {
@@ -40,18 +26,13 @@ struct LogStack {
     std::mutex mut;
     std::condition_variable cv;
 
-    void push(const std::string &str) {
-        std::unique_lock l(mut);
-        completed.push_back(str);
-        l.unlock();
-        cv.notify_one();
-    }
+    void Push(const std::string &str);
 
 };
 
 class TBasicExecutor {
 private:
-    const static size_t STANDART_MAX_PROC_COUNT = 4;
+    const constexpr static size_t STANDART_MAX_PROC_COUNT = 4;
 
     size_t maxProcCount;
     LogStack * log;
@@ -67,10 +48,7 @@ public:
     TBasicExecutor(LogStack *_log) : maxProcCount(STANDART_MAX_PROC_COUNT), log(_log) { }
     TBasicExecutor(size_t mpCount, LogStack *_log) : maxProcCount(mpCount), log(_log) { }
 
-    void Execute(const std::string &path, const std::string &name) {
-        std::thread t(&TBasicExecutor::RawExecute, this, name, path, log);
-        t.detach();
-    }
+    void Execute(const std::string &path, const std::string &name);
 
 };
 
@@ -81,8 +59,6 @@ private:
     size_t maxProcCount;
 
     size_t target, current;
-    // std::mutex cMut;
-    // std::condition_variable cCv;
 
     size_t procCount;
     std::set<std::string> actuallyReadyToBeExecuted;

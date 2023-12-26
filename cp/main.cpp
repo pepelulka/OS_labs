@@ -21,7 +21,7 @@ int main(int argc, char ** argv) {
     }
 
     std::string pathToConfig(argv[1]);
-    TJobDag dag = JSONParser::parse(pathToConfig);
+    TJobDag dag = JSONParser::Parse(pathToConfig);
     TDagJobExecutor executor(maxJobs);
     executor.Execute(dag);
 

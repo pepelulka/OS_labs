@@ -37,21 +37,13 @@ private:
 
     // 0 - not-visited, 1 - in current route, 2 - visited and not in current route
     // returns true if have loops, false - otherwise
-    static bool dfs(const std::string &v,
+    static bool Dfs(const std::string &v,
                     std::map<std::string, int>& visited,
                     TMapStringToStrings& dep);
 
-    static bool CheckCorectness(TJobDag &dag);
+    static bool CheckCorrectness(TJobDag &dag);
 
-    static TMapStringToStrings inverse(TMapStringToStrings &map) {
-        TMapStringToStrings result;
-        for (auto p : map) {
-            for (auto target : p.second) {
-                result[target].push_back(p.first);
-            }
-        }
-        return result;
-    }
+    static TMapStringToStrings Inverse(TMapStringToStrings &map);
 
 public:
 
@@ -61,39 +53,7 @@ public:
     TJobDag(const std::vector<TJob>& jobs,
             const std::vector<std::pair<std::string, std::string>>& deps,
             const std::vector<std::string>& _mutexes = {},
-            const TMapStringToStrings& _mutOwn = {}) {
-        TJobDag temp;
-        for (auto i : jobs) {
-            temp.jobs[i.name] = i;
-        }
-        for (auto p : deps) {
-            temp.dep[p.second].push_back(p.first);
-        }
-        if (CheckCorectness(temp)) {
-            *this = temp;
-        } else {
-            throw std::logic_error("Bad DAG");
-        }
-        mutexes = _mutexes;
-        mutOwn = _mutOwn;
-        rdep = inverse(dep);
-    }
-
-    void print() {
-        std::cout << "JOB DAG : ============\n";
-        for (auto p : jobs) {
-            std::cout << "JOB{" << p.second.name << ", " << p.second.path << "} ";
-        }
-        std::cout << std::endl;
-        for (auto p : dep) {
-            std::cout << p.first << " <- ";
-            for (auto to : p.second) {
-                std::cout << to << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "======================\n";
-    }
+            const TMapStringToStrings& _mutOwn = {});
 
 };
 
@@ -133,7 +93,7 @@ public:
 class JSONParser {
 public:
 
-    static TJobDag parse(const std::string &pathToFile);
+    static TJobDag Parse(const std::string &pathToFile);
 
 };
 
