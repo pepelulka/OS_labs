@@ -17,12 +17,11 @@ void TComputerNode::CreateChild(NodeId id1, Port bPullPort, Port bPushPort) {
     pushPortBottom = bPullPort;
     pushSocketBottom.connect("tcp://localhost:" + std::to_string(pushPortBottom));
     haveChild = true;
-    int pid = CreateProcess(path, id1, bPullPort, bPushPort);
-    zmq::message_t msg("OK: " + std::to_string(pid));
-    pushSocket.send(msg, zmq::send_flags::none);
+    CreateProcess(path, id1, bPullPort, bPushPort);
 }
 
 void TComputerNode::Routine() {
+    pushSocket.send(zmq::message_t("OK: " + std::to_string(getpid())), zmq::send_flags::none);
     while (true) {
         zmq::message_t msg;
         pullSocket.recv(msg, zmq::recv_flags::none);
@@ -55,6 +54,27 @@ void TComputerNode::Routine() {
                 zmq::message_t msg("OK:" + std::to_string(id) + ": " + std::to_string(sum));
                 auto ret = pushSocket.send(msg, zmq::send_flags::none);
             }
+        } else if (command[0] == 'r') {
+            if (pushPortBottom == 0) {
+                pushSocket.send(zmq::message_t("p " + std::to_string(id)), zmq::send_flags::none);
+            } else {
+                pushSocketBottom.send(zmq::message_t("r"), zmq::send_flags::none);
+                zmq::message_t msg;
+                std::vector<zmq::pollitem_t> items = {
+                    { static_cast<void*>(pullSocket), 0, ZMQ_POLLIN, 0 }
+                };
+                int pollRes = zmq::poll(items, SECOND_PING_TIME.count());
+                if (pollRes == 0) {
+                    pushSocket.send(zmq::message_t("p " + std::to_string(id)), zmq::send_flags::none);
+                } else {
+                    zmq::message_t msg1;
+                    pullSocket.recv(msg1, zmq::recv_flags::none);
+                    pushSocket.send(zmq::message_t(msg1.to_string() + " " + std::to_string(id)), zmq::send_flags::none);
+                }
+            }
+        } else if (command[0] == 'p') {
+            content += " " + std::to_string(id);
+            pushSocket.send(zmq::message_t(content), zmq::send_flags::none);
         } else {
             pushSocket.send(msg, zmq::send_flags::none);
         }

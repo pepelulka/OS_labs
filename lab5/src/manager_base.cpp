@@ -18,6 +18,20 @@ TTask TTask::MakeResult(const std::string &result) {
     return TTask{TTaskType::RESULT, 0, 0, {}, result};
 }
 
+std::set<NodeId> TSink::GetPingingResultAndFinishPinging() {
+    std::lock_guard l(mtx);
+    if (!pingingMode) {
+        throw std::logic_error("Something defenitely went wrong");
+    }
+    std::set<NodeId> result;
+    while (!pingingResult.empty()) {
+        result.insert(pingingResult.top());
+        pingingResult.pop();
+    }
+    pingingMode = false;
+    return result;
+}
+
 TSink::TSink(TTaskQueue& _tq, Port _port) : tq(_tq), context(2), inputSocket(context, zmq::socket_type::pull), port(_port) {
     inputSocket.bind("tcp://localhost:" + std::to_string(port));
 }
@@ -26,10 +40,22 @@ void TSink::Routine() {
     while (true) {
         zmq::message_t msg;
         auto result = inputSocket.recv(msg, zmq::recv_flags::none);
-        //
-
-        //
         std::string content((char*)msg.data(), (char*)msg.data() + msg.size());
+        // Pinging
+        if (content.size() >= 1 && content[0] == 'p') {
+            std::lock_guard l(mtx);
+            if (pingingMode) {
+                std::stringstream ss(content);
+                std::string dummy;
+                ss >> dummy;
+                NodeId id1;
+                while (ss >> id1) {
+                    pingingResult.push(id1);
+                }
+            }
+            continue;
+        }
+        //
         tq.push(TTask::MakeResult(content));
     }
 }
@@ -98,7 +124,6 @@ void TNodeStructure::AddNewChild(NodeId id) {
     childSockets[id] = zmq::socket_t(context, zmq::socket_type::push);
     childSockets[id].connect("tcp://localhost:" + std::to_string(childPorts[id]));
     int pid = CreateProcess(path, id, childPorts[id], sinkPort);
-    front.PushResult("OK: " + std::to_string(pid));
 }
 
 void TNodeStructure::SendCreate(NodeId id, int parent) {
@@ -147,11 +172,38 @@ void TNodeStructure::SendExec(NodeId id, const std::vector<int>& a) {
     }
 }
 
-void TNodeStructure::SendPing() {
-
+void TSink::StartPinging() {
+    std::lock_guard l(mtx);
+    pingingMode = true;
 }
 
-TMainManager::TMainManager(const std::string &path, TFrontend &front) : sinkPort(TPortPool::get()), ns(path, sinkPort, front), frontend(front), sink(wq, sinkPort) {
+void TNodeStructure::SendPing() {
+    sink.StartPinging();
+    for (auto& p : childSockets) {
+        zmq::message_t msg("r");
+        p.second.send(msg, zmq::send_flags::none);
+    }
+    std::this_thread::sleep_for(FIRST_PING_TIME);
+    // Harvest
+    {
+        std::set<NodeId> result = sink.GetPingingResultAndFinishPinging();
+        if (result.size() == nodes.size()) {
+            front.PushResult("Ok: -1");
+            sinkSocket.send(zmq::message_t("Ok: -1"), zmq::send_flags::none);
+        } else {
+            std::string content = "Ok: ";
+            for (const auto& nId : nodes) {
+                if (result.find(nId) == result.end()) {
+                    content += std::to_string(nId) + " ";
+                }
+            }
+            front.PushResult(content);
+            sinkSocket.send(zmq::message_t(content), zmq::send_flags::none);
+        }
+    }
+}
+
+TMainManager::TMainManager(const std::string &path, TFrontend &front) : sinkPort(TPortPool::get()), sink(wq, sinkPort), ns(path, sinkPort, front, sink), frontend(front) {
     sinkPort = sink.port;
     ns.sinkPort = sink.port;
     frontend.tq = &wq;

@@ -7,6 +7,7 @@
 #include <map>
 #include <queue>
 #include <sstream>
+#include <stack>
 
 #include "base.hpp"
 #include "wqueue.hpp"
@@ -52,11 +53,20 @@ private:
     zmq::context_t context;
     zmq::socket_t inputSocket;
 
+    //
+    bool pingingMode = false;
+    std::stack<NodeId> pingingResult; // Contains result of pinging, vector of nodeId's that is availible
+    std::mutex mtx; // pingingResult & pingingMode mutex
+    //
+
     Port port;
 
 public:
 
     friend class TMainManager;
+
+    std::set<NodeId> GetPingingResultAndFinishPinging();
+    void StartPinging();
 
     TSink(TTaskQueue& _tq, Port _port);
 
@@ -106,12 +116,12 @@ private:
     std::map<NodeId, std::set<NodeId>> childSets;
     std::map<NodeId, zmq::socket_t> childSockets;
     std::map<NodeId, Port> childPorts;
-
-    std::map<NodeId, zmq::socket_t> pingSockets;
+    zmq::socket_t sinkSocket;
 
     std::string path;
 
     Port sinkPort;
+    TSink &sink;
 
     TFrontend &front;
 
@@ -120,7 +130,12 @@ public:
     friend class TMainManager;
 
     TNodeStructure() = delete;
-    TNodeStructure(const std::string &_path, Port _sinkPort, TFrontend &_front) : context(3), path(_path), sinkPort(_sinkPort), front(_front) { }
+    TNodeStructure(const std::string &_path,
+                   Port _sinkPort,
+                   TFrontend &_front,
+                   TSink &_sink) : context(1), path(_path), sinkPort(_sinkPort), front(_front), sink(_sink), sinkSocket(context, zmq::socket_type::push) {
+        sinkSocket.connect("tcp://localhost:" + std::to_string(sinkPort));
+    }
 
     void AddNewChild(NodeId id);
 
