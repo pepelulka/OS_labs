@@ -97,7 +97,7 @@ void TNodeStructure::AddNewChild(NodeId id) {
     childPorts[id] = TPortPool::get();
     childSockets[id] = zmq::socket_t(context, zmq::socket_type::push);
     childSockets[id].connect("tcp://localhost:" + std::to_string(childPorts[id]));
-    int pid = CreateProcess(path, id, childPorts[id], sinkPort, TPortPool::get());
+    int pid = CreateProcess(path, id, childPorts[id], sinkPort);
     front.PushResult("OK: " + std::to_string(pid));
 }
 

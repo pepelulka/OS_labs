@@ -19,6 +19,6 @@ const Port UPPER_PORT = 5600;
 // ms
 const size_t PING_TIME = 500;
 
-int CreateProcess(const std::string &path, NodeId id, Port pullPort, Port pushPort, Port pingPort);
+int CreateProcess(const std::string &path, NodeId id, Port pullPort, Port pushPort);
 
 }

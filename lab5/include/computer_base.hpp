@@ -22,9 +22,9 @@ private:
 
 public:
 
-    TComputerNode(const std::string& _path, NodeId _id, Port _pullPort, Port _pushPort, Port _pingPort);
+    TComputerNode(const std::string& _path, NodeId _id, Port _pullPort, Port _pushPort);
 
-    void CreateChild(NodeId id1, Port bPullPort, Port bPushPort, Port pingPort);
+    void CreateChild(NodeId id1, Port bPullPort, Port bPushPort);
 
     void Routine();
 

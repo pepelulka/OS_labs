@@ -2,22 +2,22 @@
 
 namespace lab5 {
 
-TComputerNode::TComputerNode(const std::string& _path, NodeId _id, Port _pullPort, Port _pushPort, Port _pingPort) : id(_id), pullPort(_pullPort), pushPort(_pushPort), context(1), path(_path), pingPort(_pingPort),
-                                                                                                                     pullSocket(context, zmq::socket_type::pull),
-                                                                                                                     pushSocket(context, zmq::socket_type::push),
-                                                                                                                     pushSocketBottom(context, zmq::socket_type::push) {
+TComputerNode::TComputerNode(const std::string& _path, NodeId _id, Port _pullPort, Port _pushPort) : id(_id), pullPort(_pullPort), pushPort(_pushPort), context(1), path(_path),
+                                                                                                     pullSocket(context, zmq::socket_type::pull),
+                                                                                                     pushSocket(context, zmq::socket_type::push),
+                                                                                                     pushSocketBottom(context, zmq::socket_type::push) {
     pushSocket.connect("tcp://localhost:" + std::to_string(pushPort));
     pullSocket.bind("tcp://localhost:" + std::to_string(pullPort));
 }
 
-void TComputerNode::CreateChild(NodeId id1, Port bPullPort, Port bPushPort, Port pingPort) {
+void TComputerNode::CreateChild(NodeId id1, Port bPullPort, Port bPushPort) {
     if (haveChild) {
         return ;
     }
     pushPortBottom = bPullPort;
     pushSocketBottom.connect("tcp://localhost:" + std::to_string(pushPortBottom));
     haveChild = true;
-    int pid = CreateProcess(path, id1, bPullPort, bPushPort, pingPort);
+    int pid = CreateProcess(path, id1, bPullPort, bPushPort);
     zmq::message_t msg("OK: " + std::to_string(pid));
     pushSocket.send(msg, zmq::send_flags::none);
 }
@@ -31,10 +31,10 @@ void TComputerNode::Routine() {
         std::string command;
         ss >> command;
         if (command == "create") {
-            size_t id1, parent, port1, pingPort1;
-            ss >> id1 >> parent >> port1 >> pingPort1;
+            size_t id1, parent, port1;
+            ss >> id1 >> parent >> port1;
             if (parent == id) {
-                CreateChild(id1, port1, pullPort, pingPort1);
+                CreateChild(id1, port1, pullPort);
             } else {
                 pushSocketBottom.send(msg, zmq::send_flags::none);
             }
@@ -43,7 +43,7 @@ void TComputerNode::Routine() {
             ss >> id1;
             if (id != id1) {
                 pushSocketBottom.send(msg, zmq::send_flags::none);
-                // continue;
+                continue;
             } else {
                 ss >> n;
                 int sum = 0;
