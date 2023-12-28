@@ -113,18 +113,18 @@ class TNodeStructure {
 private:
 
     zmq::context_t context;
+    std::string path;
     std::set<NodeId> nodes;
     std::map<NodeId, std::set<NodeId>> childSets;
     std::map<NodeId, zmq::socket_t> childSockets;
     std::map<NodeId, Port> childPorts;
-    zmq::socket_t sinkSocket;
 
-    std::string path;
 
     Port sinkPort;
-    TSink &sink;
 
     TFrontend &front;
+    TSink &sink;
+    zmq::socket_t sinkSocket;
 
 public:
 
@@ -154,12 +154,13 @@ class TMainManager {
 private:
 
     TTaskQueue wq;
-    TNodeStructure ns;
-    TFrontend &frontend;
     Port sinkPort;
-
 public:
     TSink sink;
+private:
+    TNodeStructure ns;
+    TFrontend &frontend;
+public:
 
     friend class TSink;
     friend class TNodeStructure;

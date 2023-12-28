@@ -24,7 +24,10 @@ void TComputerNode::Routine() {
     pushSocket.send(zmq::message_t("OK: " + std::to_string(getpid())), zmq::send_flags::none);
     while (true) {
         zmq::message_t msg;
-        pullSocket.recv(msg, zmq::recv_flags::none);
+        auto ret = pullSocket.recv(msg, zmq::recv_flags::none);
+        if (ret.has_value() && (EAGAIN == ret.value())) {
+            throw std::logic_error("Something bad...");
+        }
         std::string content((char*)msg.data(), (char*)msg.data() + msg.size());
         std::stringstream ss(content);
         std::string command;
@@ -52,23 +55,26 @@ void TComputerNode::Routine() {
                     sum += cur;
                 }
                 zmq::message_t msg("OK:" + std::to_string(id) + ": " + std::to_string(sum));
-                auto ret = pushSocket.send(msg, zmq::send_flags::none);
+                pushSocket.send(msg, zmq::send_flags::none);
             }
         } else if (command[0] == 'r') {
             if (pushPortBottom == 0) {
                 pushSocket.send(zmq::message_t("p " + std::to_string(id)), zmq::send_flags::none);
             } else {
-                pushSocketBottom.send(zmq::message_t("r"), zmq::send_flags::none);
+                pushSocketBottom.send(zmq::message_t(std::string("r")), zmq::send_flags::none);
                 zmq::message_t msg;
                 std::vector<zmq::pollitem_t> items = {
                     { static_cast<void*>(pullSocket), 0, ZMQ_POLLIN, 0 }
                 };
-                int pollRes = zmq::poll(items, SECOND_PING_TIME.count());
+                int pollRes = zmq::poll(items, SECOND_PING_TIME);
                 if (pollRes == 0) {
                     pushSocket.send(zmq::message_t("p " + std::to_string(id)), zmq::send_flags::none);
                 } else {
                     zmq::message_t msg1;
-                    pullSocket.recv(msg1, zmq::recv_flags::none);
+                    auto ret = pullSocket.recv(msg1, zmq::recv_flags::none);
+                    if (ret.has_value() && (EAGAIN == ret.value())) {
+                        throw std::logic_error("Something bad...");
+                    }
                     pushSocket.send(zmq::message_t(msg1.to_string() + " " + std::to_string(id)), zmq::send_flags::none);
                 }
             }

@@ -3,15 +3,15 @@
 namespace lab5 {
 
 TTask TTask::MakeCreate(NodeId id, int parent) {
-    return TTask{TTaskType::CREATE, id, parent};
+    return TTask{TTaskType::CREATE, id, parent, {}, {}};
 }
 
 TTask TTask::MakeExec(NodeId id, const std::vector<int>& data) {
-    return TTask{TTaskType::EXEC, id, 0, data};
+    return TTask{TTaskType::EXEC, id, 0, data, {}};
 }
 
 TTask TTask::MakePing() {
-    return TTask{TTaskType::PING};
+    return TTask{TTaskType::PING, 0, 0, {}, {}};
 }
 
 TTask TTask::MakeResult(const std::string &result) {
@@ -39,7 +39,10 @@ TSink::TSink(TTaskQueue& _tq, Port _port) : tq(_tq), context(2), inputSocket(con
 void TSink::Routine() {
     while (true) {
         zmq::message_t msg;
-        auto result = inputSocket.recv(msg, zmq::recv_flags::none);
+        auto ret = inputSocket.recv(msg, zmq::recv_flags::none);
+        if (ret.has_value() && (EAGAIN == ret.value())) {
+            throw std::logic_error("Something bad...");
+        }
         std::string content((char*)msg.data(), (char*)msg.data() + msg.size());
         // Pinging
         if (content.size() >= 1 && content[0] == 'p') {
@@ -123,7 +126,7 @@ void TNodeStructure::AddNewChild(NodeId id) {
     childPorts[id] = TPortPool::get();
     childSockets[id] = zmq::socket_t(context, zmq::socket_type::push);
     childSockets[id].connect("tcp://localhost:" + std::to_string(childPorts[id]));
-    int pid = CreateProcess(path, id, childPorts[id], sinkPort);
+    CreateProcess(path, id, childPorts[id], sinkPort);
 }
 
 void TNodeStructure::SendCreate(NodeId id, int parent) {
@@ -180,7 +183,7 @@ void TSink::StartPinging() {
 void TNodeStructure::SendPing() {
     sink.StartPinging();
     for (auto& p : childSockets) {
-        zmq::message_t msg("r");
+        zmq::message_t msg(std::string("r"));
         p.second.send(msg, zmq::send_flags::none);
     }
     std::this_thread::sleep_for(FIRST_PING_TIME);
@@ -189,7 +192,7 @@ void TNodeStructure::SendPing() {
         std::set<NodeId> result = sink.GetPingingResultAndFinishPinging();
         if (result.size() == nodes.size()) {
             front.PushResult("Ok: -1");
-            sinkSocket.send(zmq::message_t("Ok: -1"), zmq::send_flags::none);
+            sinkSocket.send(zmq::message_t(std::string("Ok: -1")), zmq::send_flags::none);
         } else {
             std::string content = "Ok: ";
             for (const auto& nId : nodes) {

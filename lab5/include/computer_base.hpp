@@ -11,13 +11,13 @@ namespace lab5 {
 class TComputerNode {
 private:
 
-    std::string path;
     NodeId id;
-    Port pushPort, pullPort, pushPortBottom = 0, pingPort;
+    Port pullPort = 0, pushPort = 0, pushPortBottom = 0;
+    zmq::context_t context;
+    std::string path;
+    zmq::socket_t pullSocket, pushSocket, pushSocketBottom;
     bool haveChild = false;
 
-    zmq::context_t context;
-    zmq::socket_t pushSocket, pullSocket, pushSocketBottom;
 
 public:
 
