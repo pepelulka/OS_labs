@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     char* input;
     while ((input = ReadStringAndRemoveVowels(stdin)) != NULL) {
         fprintf(file, "%s", input);
-        // fflush(file);
+        fflush(file);
 
         free(input);
     }
