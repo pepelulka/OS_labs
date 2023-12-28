@@ -1,11 +1,9 @@
 #pragma once
 
 #include <iostream>
-
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
 #include <chrono>
 
 #include <unistd.h>
@@ -24,7 +22,6 @@ const auto FIRST_PING_TIME = 2000ms;
 const auto SECOND_PING_TIME = 500ms;
 
 // For ping we use message "r" for descend and "p" for ascend
-//
 
 int CreateProcess(const std::string &path, NodeId id, Port pullPort, Port pushPort);
 

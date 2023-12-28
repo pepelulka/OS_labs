@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "base.hpp"
-
 #include "zmq.hpp"
 
 namespace lab5 {

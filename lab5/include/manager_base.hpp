@@ -1,6 +1,5 @@
 #pragma once
 
-#include "zmq.hpp"
 
 #include <iostream>
 #include <set>
@@ -11,6 +10,8 @@
 
 #include "base.hpp"
 #include "wqueue.hpp"
+
+#include "zmq.hpp"
 
 namespace lab5 {
 
