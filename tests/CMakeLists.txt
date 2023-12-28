@@ -31,3 +31,8 @@ target_link_libraries(lab4_test1 PRIVATE lib1 GTest::GTest)
 add_executable(lab4_test2 lab4_test2.cpp)
 target_include_directories(lab4_test2 PRIVATE ${CMAKE_SOURCE_DIR}/lab4/include)
 target_link_libraries(lab4_test2 PRIVATE lib2 GTest::GTest)
+
+add_executable(cp_test cp_test.cpp)
+target_include_directories(cp_test PRIVATE ${CMAKE_SOURCE_DIR}/cp/include)
+target_include_directories(cp_test PRIVATE ${CMAKE_SOURCE_DIR}/cp/lib)
+target_link_libraries(cp_test PRIVATE cp_lib GTest::GTest)
