@@ -192,7 +192,7 @@ void TNodeStructure::SendPing() {
         std::set<NodeId> result = sink.GetPingingResultAndFinishPinging();
         if (result.size() == nodes.size()) {
             front.PushResult("Ok: -1");
-            sinkSocket.send(zmq::message_t(std::string("Ok: -1")), zmq::send_flags::none);
+            // sinkSocket.send(zmq::message_t(std::string("Ok: -1")), zmq::send_flags::none);
         } else {
             std::string content = "Ok: ";
             for (const auto& nId : nodes) {
@@ -201,7 +201,7 @@ void TNodeStructure::SendPing() {
                 }
             }
             front.PushResult(content);
-            sinkSocket.send(zmq::message_t(content), zmq::send_flags::none);
+            // sinkSocket.send(zmq::message_t(content), zmq::send_flags::none);
         }
     }
 }
